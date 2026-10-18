@@ -73,3 +73,20 @@ print(f"Train rows: {len(train)}, test rows: {len(test)}")
 print(f"Baseline (always H): {baseline_acc:.3f}")
 print(f"Logistic regression accuracy: {accuracy_score(y_test, pred):.3f}")
 print(f"Log loss: {log_loss(y_test, proba, labels=model.classes_):.3f}")
+
+from sklearn.ensemble import RandomForestClassifier
+
+rf = RandomForestClassifier(n_estimators=300, min_samples_leaf=10, random_state=42)
+rf.fit(X_train, y_train)
+
+rf_pred = rf.predict(X_test)
+rf_proba = rf.predict_proba(X_test)
+
+print(f"Random forest accuracy: {accuracy_score(y_test, rf_pred):.3f}")
+print(f"Random forest log loss: {log_loss(y_test, rf_proba, labels=rf.classes_):.3f}")
+
+
+import joblib
+
+joblib.dump(model, "model.joblib")
+print("Saved model.joblib")
