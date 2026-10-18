@@ -90,3 +90,29 @@ import joblib
 
 joblib.dump(model, "model.joblib")
 print("Saved model.joblib")
+
+from sqlalchemy import text
+
+rows = []
+for k, (_, r) in enumerate(test.iterrows()):
+    p = dict(zip(model.classes_, proba[k]))
+    rows.append({
+        "m": int(r["id"]),
+        "ph": float(p["H"]),
+        "pd": float(p["D"]),
+        "pa": float(p["A"]),
+        "pr": str(pred[k]),
+    })
+
+with engine.begin() as conn:
+    conn.execute(text("DELETE FROM model_predictions"))
+    conn.execute(
+        text(
+            "INSERT INTO model_predictions "
+            "(match_id, p_home, p_draw, p_away, predicted_result) "
+            "VALUES (:m, :ph, :pd, :pa, :pr)"
+        ),
+        rows,
+    )
+
+print(f"Stored {len(rows)} predictions")
